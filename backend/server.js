@@ -1,19 +1,24 @@
-import express, { json } from "express";
-import { config } from "dotenv";
-import connectDB from "./config/db.js";
-import uploadRoutes from "./routes/upload.js";
+import app from './app.js';
+import { connectDatabase } from './config/database.js';
+import pino from 'pino';
 
-config();
-connectDB();
+const logger = pino();
+const PORT = process.env.PORT || 4000;
 
-const app = express();
-app.use(json());
+async function startServer() {
+  try {
+    // Connect to MongoDB
+    await connectDatabase();
+    logger.info('Connected to MongoDB');
 
-app.use("/api", uploadRoutes);
+    // Start server
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
 
-app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+startServer();
