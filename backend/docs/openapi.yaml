@@ -1,0 +1,901 @@
+openapi: 3.1.0
+info:
+  title: AI Plant Disease Detection and Treatment Platform API
+  version: 1.0.0
+  description: API for detecting plant diseases using AI and providing treatment recommendations
+servers:
+  - url: http://localhost:4000
+    description: Development server
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: User's full name
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                password:
+                  type: string
+                  minLength: 8
+                  description: User's password (minimum 8 characters)
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  accessToken:
+                    type: string
+                    description: JWT access token
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Log in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                password:
+                  type: string
+                  description: User's password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  accessToken:
+                    type: string
+                    description: JWT access token
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: JWT refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  accessToken:
+                    type: string
+                    description: New JWT access token
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Log out the current user
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /predict/image:
+    post:
+      tags:
+        - Prediction
+      summary: Upload an image for disease detection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Plant image file (JPEG, PNG, or WebP, max 10MB)
+      responses:
+        '201':
+          description: Image processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reportId:
+                    type: string
+                    description: ID of the created report
+                  disease:
+                    type: string
+                    description: Detected disease name
+                  confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    description: Confidence level of the detection
+                  imageUrl:
+                    type: string
+                    format: uri
+                    description: URL of the uploaded image
+                  treatments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Treatment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+  /predict/batch:
+    post:
+      tags:
+        - Prediction
+      summary: Upload multiple images for disease detection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - images
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Array of plant image files (max 10 files)
+      responses:
+        '201':
+          description: Images processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            success:
+                              type: boolean
+                              example: true
+                            reportId:
+                              type: string
+                              description: ID of the created report
+                            disease:
+                              type: string
+                              description: Detected disease name
+                            confidence:
+                              type: number
+                              minimum: 0
+                              maximum: 1
+                              description: Confidence level of the detection
+                            imageUrl:
+                              type: string
+                              format: uri
+                              description: URL of the uploaded image
+                            treatments:
+                              type: array
+                              items:
+                                $ref: '#/components/schemas/Treatment'
+                        - type: object
+                          properties:
+                            success:
+                              type: boolean
+                              example: false
+                            error:
+                              $ref: '#/components/schemas/Error'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+  /treatments/{disease}:
+    get:
+      tags:
+        - Treatments
+      summary: Get treatments for a specific disease
+      parameters:
+        - name: disease
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Name of the disease
+      responses:
+        '200':
+          description: Treatments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  treatments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Treatment'
+                  note:
+                    type: string
+                    description: Additional notes about the treatments
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /reports/me:
+    get:
+      tags:
+        - Reports
+      summary: Get paginated list of user's reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Report'
+                  page:
+                    type: integer
+                    description: Current page number
+                  limit:
+                    type: integer
+                    description: Number of items per page
+                  total:
+                    type: integer
+                    description: Total number of reports
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /reports/{id}:
+    get:
+      tags:
+        - Reports
+      summary: Get a specific report by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Report ID
+      responses:
+        '200':
+          description: Report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Report'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Reports
+      summary: Delete a report by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Report ID
+      responses:
+        '200':
+          description: Report deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Report deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /admin/reports:
+    get:
+      tags:
+        - Admin
+      summary: Get paginated list of all reports with filters
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of items per page
+        - name: userId
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID
+        - name: disease
+          in: query
+          schema:
+            type: string
+          description: Filter by disease name
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter by start date (ISO 8601 format)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter by end date (ISO 8601 format)
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Report'
+                  page:
+                    type: integer
+                    description: Current page number
+                  limit:
+                    type: integer
+                    description: Number of items per page
+                  total:
+                    type: integer
+                    description: Total number of reports
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /admin/treatments:
+    post:
+      tags:
+        - Admin
+      summary: Create a new treatment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - diseaseId
+                - method
+                - steps
+              properties:
+                diseaseId:
+                  type: string
+                  description: ID of the disease
+                disease:
+                  type: string
+                  description: Name of the disease (used if diseaseId is not provided)
+                method:
+                  type: string
+                  enum: [organic, chemical, cultural, integrated]
+                  description: Treatment method
+                steps:
+                  type: array
+                  items:
+                    type: string
+                  description: Steps for the treatment
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: URL of an image showing the treatment
+                approved:
+                  type: boolean
+                  description: Whether the treatment is approved
+                  default: false
+      responses:
+        '201':
+          description: Treatment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Treatment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /admin/treatments/{id}:
+    put:
+      tags:
+        - Admin
+      summary: Update an existing treatment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Treatment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method:
+                  type: string
+                  enum: [organic, chemical, cultural, integrated]
+                  description: Treatment method
+                steps:
+                  type: array
+                  items:
+                    type: string
+                  description: Steps for the treatment
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: URL of an image showing the treatment
+                approved:
+                  type: boolean
+                  description: Whether the treatment is approved
+      responses:
+        '200':
+          description: Treatment updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Treatment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Admin
+      summary: Delete a treatment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Treatment ID
+      responses:
+        '200':
+          description: Treatment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Treatment deleted successfully
+                  data:
+                    $ref: '#/components/schemas/Treatment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /feedback:
+    post:
+      tags:
+        - Feedback
+      summary: Submit feedback for a report
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reportId
+                - is_correct
+              properties:
+                reportId:
+                  type: string
+                  description: ID of the report
+                is_correct:
+                  type: boolean
+                  description: Whether the prediction was correct
+                notes:
+                  type: string
+                  maxLength: 1000
+                  description: Additional notes about the feedback
+      responses:
+        '201':
+          description: Feedback submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Feedback submitted successfully
+                  data:
+                    $ref: '#/components/schemas/Feedback'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /chat/query:
+    post:
+      tags:
+        - Chat
+      summary: Ask a plant care question
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: Plant care question
+      responses:
+        '200':
+          description: Answer to the question
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                    description: Answer to the question
+                  sources:
+                    type: array
+                    items:
+                      type: string
+                    description: Sources for the answer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        role:
+          type: string
+          enum: [user, admin]
+          description: User's role
+        createdAt:
+          type: string
+          format: date-time
+          description: When the user was created
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Report ID
+        userId:
+          type: string
+          description: ID of the user who created the report
+        imageUrl:
+          type: string
+          format: uri
+          description: URL of the uploaded image
+        cloudinaryPublicId:
+          type: string
+          description: Cloudinary public ID of the image
+        predictedDisease:
+          type: string
+          description: Detected disease name
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence level of the detection
+        treatmentIds:
+          type: array
+          items:
+            type: string
+          description: IDs of the treatments
+        aiTreatments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Treatment'
+          description: AI-generated treatments
+        createdAt:
+          type: string
+          format: date-time
+          description: When the report was created
+        deleted:
+          type: boolean
+          description: Whether the report is deleted
+    Treatment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Treatment ID
+        diseaseId:
+          type: string
+          description: ID of the disease
+        method:
+          type: string
+          enum: [organic, chemical, cultural, integrated]
+          description: Treatment method
+        steps:
+          type: array
+          items:
+            type: string
+          description: Steps for the treatment
+        imageUrl:
+          type: string
+          format: uri
+          description: URL of an image showing the treatment
+        approved:
+          type: boolean
+          description: Whether the treatment is approved
+        ai_generated:
+          type: boolean
+          description: Whether the treatment was generated by AI
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Feedback ID
+        reportId:
+          type: string
+          description: ID of the report
+        userId:
+          type: string
+          description: ID of the user who provided feedback
+        is_correct:
+          type: boolean
+          description: Whether the prediction was correct
+        notes:
+          type: string
+          description: Additional notes about the feedback
+        createdAt:
+          type: string
+          format: date-time
+          description: When the feedback was created
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+    PayloadTooLarge:
+      description: Payload too large
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
