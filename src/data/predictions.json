@@ -1,0 +1,153 @@
+{
+  "diseases": [
+    {
+      "id": "Rose",
+      "label": "Treatment Needed",
+      "description": "Black Spot Disease (Diplocarpon rosae)",
+      "confidence": 0.92,
+      "image": "/images/rose_black_spot.png",
+      "hash": "069c44574287bb91021da2f9e4a50b8868af2ffd859ce1fec554e7c0bf8d2ffc",
+      "details": {
+        "symptoms": [
+          "Circular black spots with fringed margins on upper leaf surfaces.",
+          "Yellowing of leaf tissue around the black spots.",
+          "Premature leaf drop (defoliation).",
+          "In severe cases, lesions may appear on stems."
+        ],
+        "treatment": [
+          "Remove and destroy infected leaves (do not compost).",
+          "Prune affected canes.",
+          "Apply fungicides specifically for black spot (e.g., those containing chlorothalonil, myclobutanil, or propiconazole). Follow label instructions.",
+          "Improve air circulation around the plant.",
+          "Water at the base of the plant to avoid wetting leaves."
+        ],
+        "tips": [
+          "Choose disease-resistant rose varieties.",
+          "Maintain good garden hygiene.",
+          "Water in the morning to allow leaves to dry.",
+          "Mulch around the base of plants to prevent spores from splashing up.",
+          "Regularly inspect plants for early signs of disease."
+        ]
+      }
+    },
+    {
+      "id": "Tomato",
+      "label": "Treatment Needed",
+      "description": "Early Blight (Alternaria solani)",
+      "confidence": 0.95,
+      "image": "/images/Early_Blight.png",
+      "hash": "e7a13c3bb7dc76c191d7f022e59561cf6e5cc45862d2bd164493b6283f0df123",
+      "details": {
+        "symptoms": [
+          "Dark brown to black spots on older leaves, often with concentric rings (target-like pattern).",
+          "Spots may be surrounded by a yellow halo.",
+          "Lesions can also appear on stems and fruit.",
+          "Leaves may turn yellow, wither, and drop prematurely."
+        ],
+        "treatment": [
+          "Remove and destroy infected leaves and plant debris.",
+          "Rotate crops to avoid planting tomatoes in the same spot year after year.",
+          "Apply fungicides containing chlorothalonil, mancozeb, or copper-based products. Follow label instructions.",
+          "Ensure good air circulation around plants.",
+          "Stake or cage plants to keep foliage off the ground."
+        ],
+        "tips": [
+          "Plant resistant varieties if available.",
+          "Practice good garden sanitation.",
+          "Water plants at the base to avoid wetting foliage.",
+          "Maintain adequate spacing between plants.",
+          "Mulch to prevent soil splash onto lower leaves."
+        ]
+      }
+    },
+    {
+      "id": "Cucumber",
+      "label": "Treatment Needed",
+      "description": "Downy Mildew (Pseudoperonospora cubensis)",
+      "confidence": 0.93,
+      "image": "/images/Downy_Mildew.png",
+      "hash": "e8cb3b13139d9cf1d34953a9add765f7098146bc7014cfa945cf85243a95bb58",
+      "details": {
+        "symptoms": [
+          "Angular, water-soaked spots on the upper surface of older leaves, often limited by leaf veins.",
+          "Spots turn yellow, then brown or necrotic.",
+          "Under humid conditions, a purplish-gray fuzzy growth (spores) may be visible on the underside of leaves.",
+          "Leaves can curl, distort, and eventually shrivel and die."
+        ],
+        "treatment": [
+          "Remove and destroy infected leaves and severely diseased plants.",
+          "Apply fungicides specifically labeled for downy mildew on cucurbits (e.g., those containing propamocarb, dimethomorph, or fluopicolide). Rotate fungicides with different modes of action.",
+          "Improve air circulation through proper plant spacing and pruning.",
+          "Avoid overhead irrigation, especially in the evening."
+        ],
+        "tips": [
+          "Plant resistant or tolerant cucumber varieties.",
+          "Monitor plants regularly, especially during cool, wet weather.",
+          "Provide good air movement around plants.",
+          "Water at the base of the plant in the morning.",
+          "Sanitize tools and remove plant debris to reduce overwintering spores."
+        ]
+      }
+    },
+    {
+      "id": "Sunflower",
+      "label": "Healthy Plant",
+      "description": "Healthy Sunflower Plant",
+      "confidence": 0.98,
+      "image": "/images/Healthy_SunFlower.jpg",
+      "hash": "7490f041244bd89d6884eabae7a216b8e20d4c9b9a616a5e1da57bcf1fe13662",
+      "details": {
+        "symptoms": [
+          "Vibrant, dark green leaves.",
+          "Sturdy, upright stems.",
+          "Absence of spots, lesions, discoloration, or pest damage.",
+          "Consistent new growth and overall vigor."
+        ],
+        "treatment": [
+          "Maintain consistent watering schedule.",
+          "Ensure adequate sunlight exposure (6-8+ hours daily).",
+          "Provide well-draining, nutrient-rich soil.",
+          "Monitor regularly for early signs of stress or pests.",
+          "Apply appropriate fertilizer if soil tests indicate deficiencies."
+        ],
+        "tips": [
+          "Choose a sunny location for planting.",
+          "Space plants appropriately for good air circulation.",
+          "Mulch to retain soil moisture and suppress weeds.",
+          "Support taller varieties to prevent lodging.",
+          "Rotate crops to prevent soil-borne disease buildup."
+        ]
+      }
+    },
+    {
+      "id": "Maple",
+      "label": "Treatment Needed",
+      "description": "Powdery Mildew on Maple Leaf",
+      "confidence": 0.99,
+      "image": "/images/powdery_mildew.png",
+      "hash": "ea1a71b94157c590497f04d15c439bb1011b06293c87e4b0ff69426b659b6077",
+      "details": {
+        "symptoms": [
+          "White to grayish, powdery patches on the upper and sometimes lower leaf surfaces.",
+          "Leaves may become distorted, curled, or stunted.",
+          "In severe cases, leaves can turn yellow or brown and drop prematurely.",
+          "Reduced photosynthesis and overall plant vigor."
+        ],
+        "treatment": [
+          "Remove and destroy infected leaves and plant debris.",
+          "Prune affected branches to improve air circulation.",
+          "Apply fungicides specifically labeled for powdery mildew (e.g., those containing sulfur, neem oil, potassium bicarbonate, or trifloxystrobin).",
+          "Ensure good air circulation around the plant.",
+          "Avoid excessive nitrogen fertilization, which can promote new, susceptible growth."
+        ],
+        "tips": [
+          "Choose resistant plant varieties if available.",
+          "Water plants at the base to avoid wetting foliage.",
+          "Space plants adequately to allow for air movement.",
+          "Ensure plants are not stressed by drought.",
+          "Regularly monitor for early signs of the disease."
+        ]
+      }
+    }
+  ]
+}
